@@ -38,24 +38,27 @@ const App = () => {
       fetchWaivers();
     }, []);
 
-  const handleSave = async () => {
-    if (!signaturePad.isEmpty()) {
-      const signatureData = signaturePad.toDataURL();
-      try {
-        const response = await axios.post(`${BASE_URL}/waivers`, {
-          firstName,
-          lastName,
-          isAdult,
-          signatureData,
-        });
-  
-        if (response.status === 201) {
-          console.log('Waiver saved successfully!');
-          // Reset the form after successful save
-          setFirstName('');
-          setLastName('');
-          setIsAdult(true);
-          handleClearSignature();
+    const handleSave = async () => {
+      if (!signaturePad.isEmpty()) {
+        const signatureData = signaturePad.toDataURL();
+        try {
+          const response = await axios.post(`${BASE_URL}/waivers`, {
+            firstName,
+            lastName,
+            isAdult,
+            signatureData,
+          });
+    
+          if (response.status === 201) {
+            console.log('Waiver saved successfully!');
+            // Reset the form after successful save
+            setFirstName('');
+            setLastName('');
+            setIsAdult(true);
+            handleClearSignature();
+    
+          // Fetch the updated data after successful form submission
+          fetchWaivers();
         } else {
           console.error('Error saving waiver. Status:', response.status);
         }
@@ -65,9 +68,17 @@ const App = () => {
     } else {
       alert('Please sign the waiver.');
     }
+  };
 
-    // After successful form submission, fetch the updated data
-    fetchWaivers();
+  // Function to handle new waiver submission or deletion and update WaiverTable
+  const handleNewWaiver = (action, updatedWaiver) => {
+    if (action === 'add') {
+      // Add the new waiver to the existing waivers
+      setWaivers([...waivers, updatedWaiver]);
+    } else if (action === 'delete') {
+      // Filter out the deleted waiver from the existing waivers
+      setWaivers(waivers.filter((waiver) => waiver._id !== updatedWaiver._id));
+    }
   };
   
 
@@ -108,9 +119,10 @@ const App = () => {
         </div>
         </div>
         <div className="table-container">
-      <WaiverTable waivers={waivers} /> {/* Pass the 'waivers' data as a prop */}
+        <WaiverTable waivers={waivers} onNewWaiver={handleNewWaiver} />
+      </div>
     </div>
-    </div>
+
   );
 };
 

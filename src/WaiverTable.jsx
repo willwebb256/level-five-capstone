@@ -1,27 +1,11 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import axios from 'axios';
 
 const BASE_URL = 'http://localhost:9000'; // Replace with your backend server URL
 
-const WaiverTable = () => {
-  const [waivers, setWaivers] = useState([]);
+const WaiverTable = ({ waivers, onNewWaiver }) => {
   const [selectedWaiver, setSelectedWaiver] = useState(null);
   const [editedSignatureData, setEditedSignatureData] = useState('');
-
-  // Function to fetch waivers from the server
-  const fetchWaivers = async () => {
-    try {
-      const response = await axios.get(`${BASE_URL}/waivers`);
-      setWaivers(response.data);
-    } catch (error) {
-      console.error('Error fetching waivers:', error);
-    }
-  };
-
-  // Fetch waivers on component mount
-  useEffect(() => {
-    fetchWaivers();
-  }, []);
 
   // Function to handle selecting a waiver for editing
   const handleEditWaiver = (waiver) => {
@@ -36,23 +20,25 @@ const WaiverTable = () => {
         await axios.put(`${BASE_URL}/waivers/${selectedWaiver._id}`, {
           signatureData: editedSignatureData,
         });
-        fetchWaivers(); // Refresh the table after successful update
         setSelectedWaiver(null); // Clear the selected waiver after saving
+        onNewWaiver(); // Notify App component about the update
       }
     } catch (error) {
       console.error('Error saving edited waiver:', error);
     }
   };
-
-  // Function to handle deleting a waiver
-  const handleDeleteWaiver = async (waiverId) => {
-    try {
-      await axios.delete(`${BASE_URL}/waivers/${waiverId}`);
-      fetchWaivers(); // Refresh the table after successful deletion
-    } catch (error) {
-      console.error('Error deleting waiver:', error);
-    }
-  };
+  
+    // Function to handle deleting a waiver
+    const handleDeleteWaiver = async (waiverId) => {
+      try {
+        await axios.delete(`${BASE_URL}/waivers/${waiverId}`);
+        // Notify App component about the deletion
+        onNewWaiver('delete', { _id: waiverId });
+      } catch (error) {
+        console.error('Error deleting waiver:', error);
+      }
+    };
+  
 
   return (
     <div className="waiver-table">
