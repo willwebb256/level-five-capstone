@@ -5,19 +5,35 @@ const Waiver = require('../src/waiver');
 
 // Save a new waiver
 router.post('/', async (req, res) => {
-  try {
-    const { firstName, lastName, isAdult, signatureData } = req.body;
-    const newWaiver = await Waiver.create({
-      firstName,
-      lastName,
-      isAdult,
-      signatureData,
-    });
-    res.status(201).json(newWaiver);
-  } catch (error) {
-    res.status(500).json({ error: 'Unable to save waiver.' });
-  }
-});
+    try {
+      const {
+        firstName,
+        lastName,
+        phoneNumber,
+        dateOfBirth,
+        signatureData,
+        email,
+        zipCode,
+        electronicConsent,
+      } = req.body;
+  
+      const newWaiver = await Waiver.create({
+        firstName,
+        lastName,
+        phoneNumber,
+        dateOfBirth,
+        signatureData,
+        email,
+        zipCode,
+        electronicConsent,
+      });
+  
+      res.status(201).json(newWaiver);
+    } catch (error) {
+      res.status(500).json({ error: 'Unable to save waiver.' });
+    }
+  });
+  
 
 // Search waivers by first name, last name, or date
 router.get('/', async (req, res) => {
@@ -64,6 +80,53 @@ router.delete('/:id', async (req, res) => {
     res.status(500).json({ error: 'Unable to delete waiver.' });
   }
 });
-
-module.exports = router;
+// Get a waiver by ID
+router.get('/:id', async (req, res) => {
+    try {
+      const waiverId = req.params.id;
+      const waiver = await Waiver.findById(waiverId);
+      if (!waiver) {
+        return res.status(404).json({ error: 'Waiver not found.' });
+      }
+      res.json(waiver);
+    } catch (error) {
+      res.status(500).json({ error: 'Unable to fetch waiver.' });
+    }
+  });
+  
+  // Update a waiver by ID (with additional fields)
+  router.put('/:id', async (req, res) => {
+    try {
+      const waiverId = req.params.id;
+      const {
+        phoneNumber,
+        dateOfBirth,
+        email,
+        zipCode,
+        electronicConsent,
+      } = req.body;
+  
+      const updatedWaiver = await Waiver.findByIdAndUpdate(
+        waiverId,
+        {
+          phoneNumber,
+          dateOfBirth,
+          email,
+          zipCode,
+          electronicConsent,
+        },
+        { new: true }
+      );
+  
+      if (!updatedWaiver) {
+        return res.status(404).json({ error: 'Waiver not found.' });
+      }
+  
+      res.json(updatedWaiver);
+    } catch (error) {
+      res.status(500).json({ error: 'Unable to update waiver.' });
+    }
+  });
+  
+  module.exports = router;
 
