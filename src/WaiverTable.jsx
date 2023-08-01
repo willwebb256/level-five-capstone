@@ -1,12 +1,17 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
 const BASE_URL = 'http://localhost:9000'; // Replace with your backend server URL
 
-const WaiverTable = ({ waivers, onNewWaiver }) => {
+const WaiverTable = ({ waivers, searchQuery, onNewWaiver }) => {
   const [selectedWaiver, setSelectedWaiver] = useState(null);
   const [editedSignatureData, setEditedSignatureData] = useState('');
-  const [loading, setLoading] = useState(false); // State for loading status
+  const [loading, setLoading] = useState(false);
+  const [filteredWaivers, setFilteredWaivers] = useState(waivers);
+
+  useEffect(() => {
+    setFilteredWaivers(handleSearchQuery(searchQuery));
+  }, [searchQuery, waivers]);
 
   // Function to handle selecting a waiver for editing
   const handleEditWaiver = (waiver) => {
@@ -43,6 +48,19 @@ const WaiverTable = ({ waivers, onNewWaiver }) => {
     }
   };
 
+  // Update the search query function in WaiverTable.jsx
+  const handleSearchQuery = (searchQuery) => {
+    // Filter the waivers based on the search query
+    const filteredWaivers = waivers.filter(
+      (waiver) =>
+        waiver.firstName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        waiver.lastName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        new Date(waiver.dateSigned).toLocaleDateString('en-US').includes(searchQuery)
+    );
+
+    return filteredWaivers;
+  };
+
   return (
     <>
       <div className="waiver-table">
@@ -67,7 +85,7 @@ const WaiverTable = ({ waivers, onNewWaiver }) => {
               </tr>
             </thead>
             <tbody>
-              {waivers.map((waiver) => (
+              {filteredWaivers.map((waiver) => (
                 <tr key={waiver._id}>
                   <td>{waiver.firstName}</td>
                   <td>{waiver.lastName}</td>
@@ -118,3 +136,4 @@ const WaiverTable = ({ waivers, onNewWaiver }) => {
 };
 
 export default WaiverTable;
+

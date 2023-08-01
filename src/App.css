@@ -107,6 +107,40 @@ td.signature-column {
 .consent-container {
   margin-top: 10px;
 }
+
+/* Styles for the search container */
+.search-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap; /* Allow items to wrap to the next line */
+  margin-top: 20px; /* Increase the margin to separate from the signature pad */
+  width: 100%;
+}
+
+.search-container input[type="text"] {
+  flex: 1;
+  padding: 8px;
+  margin-right: 10px; /* Add some space between the input and button */
+  border: 1px solid #555;
+  border-radius: 4px;
+  font-size: 16px;
+  background-color: #292929; /* Darker gray input background */
+  color: #f0f0f0; /* Light gray input text color */
+}
+
+.search-container button {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 4px;
+  background-color: #007bff; /* Blue button color */
+  color: #fff;
+}
+
+.search-container button:hover {
+  background-color: #0056b3;
+}
+
 /* WaiverPopup.css */
 .popup-container {
   position: fixed;

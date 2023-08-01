@@ -128,5 +128,32 @@ router.get('/:id', async (req, res) => {
     }
   });
   
+  // Search waivers by first name, last name, or date
+router.get('/', async (req, res) => {
+    try {
+      const { firstName, lastName, dateSigned, searchQuery } = req.query;
+      const query = {};
+      if (searchQuery) {
+        // Use a regular expression to perform a case-insensitive search
+        query.$or = [
+          { firstName: { $regex: searchQuery, $options: 'i' } },
+          { lastName: { $regex: searchQuery, $options: 'i' } },
+          { dateSigned: { $gte: new Date(searchQuery) } },
+        ];
+      } else {
+        // Search by specific fields
+        if (firstName) query.firstName = firstName;
+        if (lastName) query.lastName = lastName;
+        if (dateSigned) query.dateSigned = { $gte: new Date(dateSigned) };
+      }
+  
+      const waivers = await Waiver.find(query);
+      res.json(waivers);
+    } catch (error) {
+      res.status(500).json({ error: 'Unable to search waivers.' });
+    }
+  });
+  
+  
   module.exports = router;
 
