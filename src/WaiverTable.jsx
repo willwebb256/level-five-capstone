@@ -1,139 +1,154 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+// WaiverTable.jsx
+import React, { useState } from 'react';
+import moment from 'moment';
+import './WaiverTable.css';
 
-const BASE_URL = 'http://localhost:9000'; // Replace with your backend server URL
+const WaiverTable = ({ waivers, searchQuery, onEditClick, onEditField, onSaveEdit, onCancelEdit, onDeleteWaiver }) => {
+  const [editableField, setEditableField] = useState(null);
+  const [editedValues, setEditedValues] = useState({});
 
-const WaiverTable = ({ waivers, searchQuery, onNewWaiver }) => {
-  const [selectedWaiver, setSelectedWaiver] = useState(null);
-  const [editedSignatureData, setEditedSignatureData] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [filteredWaivers, setFilteredWaivers] = useState(waivers);
-
-  useEffect(() => {
-    setFilteredWaivers(handleSearchQuery(searchQuery));
-  }, [searchQuery, waivers]);
-
-  // Function to handle selecting a waiver for editing
-  const handleEditWaiver = (waiver) => {
-    setSelectedWaiver(waiver);
-    setEditedSignatureData(waiver.signatureData);
+  const handleEditClick = (waiver) => {
+    onEditClick(waiver);
+    setEditableField(waiver._id);
+    setEditedValues({
+      firstName: waiver.firstName,
+      lastName: waiver.lastName,
+      dateOfBirth: waiver.dateOfBirth,
+      email: waiver.email,
+      signatureData: waiver.signatureData,
+    });
   };
 
-  // Function to handle saving the edited waiver
-  const handleSaveEditedWaiver = async () => {
-    try {
-      if (selectedWaiver) {
-        await axios.put(`${BASE_URL}/waivers/${selectedWaiver._id}`, {
-          signatureData: editedSignatureData,
-        });
-        setSelectedWaiver(null); // Clear the selected waiver after saving
-        onNewWaiver(); // Notify App component about the update
-      }
-    } catch (error) {
-      console.error('Error saving edited waiver:', error);
-    }
+  const handleEditFieldChange = (fieldName, fieldValue) => {
+    setEditedValues((prevValues) => ({
+      ...prevValues,
+      [fieldName]: fieldValue,
+    }));
   };
 
-  // Function to handle deleting a waiver
-  const handleDeleteWaiver = async (waiverId) => {
-    setLoading(true); // Set loading state to true when delete operation starts
-    try {
-      await axios.delete(`${BASE_URL}/waivers/${waiverId}`);
-      // Notify App component about the deletion
-      onNewWaiver('delete', waiverId); // Pass the entire waiver object instead of just the ID
-    } catch (error) {
-      console.error('Error deleting waiver:', error);
-    } finally {
-      setLoading(false); // Reset loading state to false after delete operation completes
-    }
+  const handleSaveEdit = (waiverId) => {
+    onSaveEdit(waiverId, editedValues);
+    setEditableField(null);
+    setEditedValues({});
   };
 
-  // Update the search query function in WaiverTable.jsx
-  const handleSearchQuery = (searchQuery) => {
-    // Filter the waivers based on the search query
-    const filteredWaivers = waivers.filter(
-      (waiver) =>
-        waiver.firstName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        waiver.lastName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        new Date(waiver.dateSigned).toLocaleDateString('en-US').includes(searchQuery)
-    );
-
-    return filteredWaivers;
+  const handleCancelEdit = () => {
+    onCancelEdit();
+    setEditableField(null);
+    setEditedValues({});
   };
+
+  const handleDeleteClick = (waiverId) => {
+    onDeleteWaiver(waiverId);
+  };
+
+  const filteredWaivers = waivers.filter((waiver) =>
+    waiver.firstName.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   return (
-    <>
-      <div className="waiver-table">
-        <h2>Saved Waivers</h2>
-        {loading ? (
-          <div>Loading...</div> // Show loading state while deleting
-        ) : (
-          <table>
-            <thead>
-              <tr>
-                <th>First Name</th>
-                <th>Last Name</th>
-                <th>Adult</th>
-                <th>Phone Number</th>
-                <th>Date of Birth</th>
-                <th>Email</th>
-                <th>Zip Code</th>
-                <th>Electronic Consent</th>
-                <th>Signature</th>
-                <th>Date</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredWaivers.map((waiver) => (
-                <tr key={waiver._id}>
-                  <td>{waiver.firstName}</td>
-                  <td>{waiver.lastName}</td>
-                  <td>{waiver.isAdult ? 'Yes' : 'No'}</td>
-                  <td>{waiver.phoneNumber}</td>
-                  <td>
-                    {/* Display only the day, month, and year for Date of Birth */}
-                    {new Date(waiver.dateOfBirth).toLocaleDateString('en-US', {
-                      year: 'numeric',
-                      month: 'long',
-                      day: 'numeric',
-                    })}
-                  </td>
-                  <td>{waiver.email}</td>
-                  <td>{waiver.zipCode}</td>
-                  <td>{waiver.electronicConsent ? 'Yes' : 'No'}</td>
-                  <td className="small-signature">
-                    {/* Display the signature image */}
-                    <img
-                      src={waiver.signatureData}
-                      alt="Signature"
-                      style={{ width: '100px', height: 'auto' }}
-                    />
-                  </td>
-                  <td>{new Date(waiver.dateSigned).toLocaleString()}</td>
-                  <td>
-                    {/* Show edit and delete buttons when a waiver is selected */}
-                    {selectedWaiver && selectedWaiver._id === waiver._id ? (
-                      <>
-                        <button onClick={handleSaveEditedWaiver}>Save</button>
-                        <button onClick={() => setSelectedWaiver(null)}>Cancel</button>
-                      </>
-                    ) : (
-                      <>
-                        <button onClick={() => handleEditWaiver(waiver)}>Edit</button>
-                        <button onClick={() => handleDeleteWaiver(waiver._id)}>Delete</button>
-                      </>
-                    )}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
-      </div>
-    </>
+    <div className="waiver-table">
+      <table>
+        <thead>
+          <tr>
+            <th>First Name</th>
+            <th>Last Name</th>
+            <th>Date of Birth</th>
+            <th>Email</th>
+            <th>Signature</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {filteredWaivers.map((waiver) => (
+            <tr key={waiver._id}>
+              <td>
+                {editableField === waiver._id ? (
+                  <input
+                    type="text"
+                    value={editedValues.firstName || waiver.firstName}
+                    onChange={(e) => handleEditFieldChange('firstName', e.target.value)}
+                  />
+                ) : (
+                  waiver.firstName
+                )}
+              </td>
+              <td>
+                {editableField === waiver._id ? (
+                  <input
+                    type="text"
+                    value={editedValues.lastName || waiver.lastName}
+                    onChange={(e) => handleEditFieldChange('lastName', e.target.value)}
+                  />
+                ) : (
+                  waiver.lastName
+                )}
+              </td>
+              <td>
+                {editableField === waiver._id ? (
+                  <input
+                    type="date"
+                    value={editedValues.dateOfBirth || moment(waiver.dateOfBirth).format('YYYY-MM-DD')}
+                    onChange={(e) => handleEditFieldChange('dateOfBirth', e.target.value)}
+                  />
+                ) : (
+                  moment(waiver.dateOfBirth).format('YYYY-MM-DD')
+                )}
+              </td>
+              <td>
+                {editableField === waiver._id ? (
+                  <input
+                    type="email"
+                    value={editedValues.email || waiver.email}
+                    onChange={(e) => handleEditFieldChange('email', e.target.value)}
+                  />
+                ) : (
+                  waiver.email
+                )}
+              </td>
+              <td className="signature-column">
+                {editableField === waiver._id ? (
+                  <input
+                    type="text"
+                    value={editedValues.signatureData || waiver.signatureData}
+                    onChange={(e) => handleEditFieldChange('signatureData', e.target.value)}
+                  />
+                ) : (
+                  <div className="small-signature" style={{ backgroundImage: `url(${waiver.signatureData})` }} />
+                )}
+              </td>
+              <td>
+                {editableField === waiver._id ? (
+                  <>
+                    <button onClick={() => handleSaveEdit(waiver._id)} className="save-button">
+                      Save
+                    </button>
+                    <button onClick={handleCancelEdit} className="cancel-button">
+                      Cancel
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <button onClick={() => handleEditClick(waiver)} className="edit-button">
+                      Edit
+                    </button>
+                    <button onClick={() => handleDeleteClick(waiver._id)} className="delete-button">
+                      Delete
+                    </button>
+                  </>
+                )}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
   );
 };
 
 export default WaiverTable;
+
+
+
+
 

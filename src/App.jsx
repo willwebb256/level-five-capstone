@@ -1,12 +1,13 @@
+// App.jsx
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import SignaturePad from 'react-signature-canvas';
-import WaiverTable from './WaiverTable'; // Import the WaiverTable component
-import companyLogo from './assets/axekpr.jpeg'; // Adjust the path to the image file
-import WaiverPopup from './WaiverPopup'; // Import the WaiverPopup component
-import './App.css'; // Import the App.css file to apply styles
+import WaiverTable from './WaiverTable';
+import companyLogo from './assets/axekpr.jpeg';
+import WaiverPopup from './WaiverPopup';
+import './App.css';
 
-const BASE_URL = 'http://localhost:9000'; // Replace with your backend server URL
+const BASE_URL = 'http://localhost:9000';
 
 const App = () => {
   const [showPopup, setShowPopup] = useState(true);
@@ -28,7 +29,6 @@ const App = () => {
   };
 
   const handleNewWaiver = (action, data) => {
-    // Function to handle new waivers
     if (action === 'delete') {
       setWaivers((prevWaivers) => prevWaivers.filter((waiver) => waiver._id !== data));
     } else {
@@ -45,10 +45,9 @@ const App = () => {
   const [waivers, setWaivers] = useState([]);
 
   const fetchWaivers = async (searchQuery = '') => {
-    // Function to fetch the waiver data from the server
     try {
       const response = await axios.get(`${BASE_URL}/waivers`, {
-        params: { searchQuery }, // Send the search query as a parameter
+        params: { searchQuery },
       });
       setWaivers(response.data);
     } catch (error) {
@@ -57,7 +56,6 @@ const App = () => {
   };
 
   useEffect(() => {
-    // useEffect hook to fetch data when the component mounts
     fetchWaivers();
   }, []);
 
@@ -108,6 +106,59 @@ const App = () => {
     fetchWaivers(searchQuery);
   };
 
+  const handleEditWaiver = async (waiverId, editedData) => {
+    try {
+      const response = await axios.put(`${BASE_URL}/waivers/${waiverId}`, editedData);
+
+      if (response.status === 200) {
+        console.log('Waiver edited successfully!');
+        fetchWaivers();
+      } else {
+        console.error('Error editing waiver. Status:', response.status);
+      }
+    } catch (error) {
+      console.error('Error editing waiver:', error);
+    }
+  };
+
+  const [selectedWaiver, setSelectedWaiver] = useState(null);
+
+  const handleEditClick = (waiver) => {
+    setSelectedWaiver(waiver);
+  };
+
+  const handleEditFieldChange = (fieldName, fieldValue) => {
+    setSelectedWaiver((prevSelectedWaiver) => ({
+      ...prevSelectedWaiver,
+      [fieldName]: fieldValue,
+    }));
+  };
+
+  const handleSaveEdit = async () => {
+    try {
+      await handleEditWaiver(selectedWaiver._id, selectedWaiver);
+      setSelectedWaiver(null); // Clear the selected waiver after saving
+    } catch (error) {
+      console.error('Error saving edited waiver:', error);
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setSelectedWaiver(null); // Clear the selected waiver without saving changes
+  };
+
+  const handleDeleteWaiver = async (waiverId) => {
+    setLoading(true);
+    try {
+      await axios.delete(`${BASE_URL}/waivers/${waiverId}`);
+      onNewWaiver('delete', waiverId);
+    } catch (error) {
+      console.error('Error deleting waiver:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="app-container">
       {showPopup && <WaiverPopup onClose={handlePopupClose} />}
@@ -156,11 +207,21 @@ const App = () => {
         <button onClick={handleSearch}>Search</button>
       </div>
       <div className="table-container">
-        <WaiverTable waivers={waivers} searchQuery={searchQuery} onNewWaiver={handleNewWaiver} />
+        <WaiverTable
+          waivers={waivers}
+          searchQuery={searchQuery}
+          onNewWaiver={handleNewWaiver}
+          onEditClick={handleEditClick}
+          onEditFieldChange={handleEditFieldChange}
+          onSaveEdit={handleSaveEdit}
+          onCancelEdit={handleCancelEdit}
+          onDeleteWaiver={handleDeleteWaiver}
+        />
       </div>
     </div>
   );
 };
 
 export default App;
+
 

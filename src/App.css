@@ -66,8 +66,8 @@ input {
   background-color: #0056b3;
 }
 
-/* Update styles for the table container and its content */
-.table-container {
+/* Styles for the table container and its content */
+.waiver-table {
   width: 100%;
   max-width: 1400px;
   margin-top: 20px;
@@ -141,7 +141,16 @@ td.signature-column {
   background-color: #0056b3;
 }
 
-/* WaiverPopup.css */
+/* Add styles for the smaller signature blocks in the table */
+.small-signature {
+  width: 100px; /* Adjust the width to your desired size */
+  height: 50px; /* Adjust the height to your desired size */
+  border: 1px solid #555;
+  background-color: #f0f0f0; /* Light gray container background */
+  margin: 5px;
+}
+
+/* Additional styles for the waiver popup */
 .popup-container {
   position: fixed;
   top: 0;
@@ -192,11 +201,79 @@ td.signature-column {
   color: #007bff; /* Set link color to a primary blue color */
 }
 
-/* Add styles for the smaller signature blocks in the table */
-.small-signature {
-  width: 100px; /* Adjust the width to your desired size */
-  height: 50px; /* Adjust the height to your desired size */
+/* Additional styles for the EditWaiverForm popup */
+.edit-form-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent dark background */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.edit-form-content {
+  background-color: #f9f9f9;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  max-width: 80%;
+  max-height: 80%;
+  overflow: auto; /* Enable scrollbar if the content overflows */
+}
+
+.edit-form-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px;
+  background-color: #333;
+  color: #fff; /* Set font color to white */
+  border-top-left-radius: 8px;
+  border-top-right-radius: 8px;
+}
+
+.edit-form-header h2 {
+  margin: 0;
+}
+
+.edit-form-body {
+  padding: 20px;
+  color: #333; /* Set font color to a darker shade */
+  font-size: 16px;
+}
+
+.edit-form-body label {
+  margin-bottom: 10px;
+}
+
+.edit-form-body input {
+  width: 100%;
+  padding: 8px;
   border: 1px solid #555;
-  background-color: #f0f0f0; /* Light gray container background */
-  margin: 5px;
+  border-radius: 4px;
+  font-size: 16px;
+  background-color: #292929; /* Darker gray input background */
+  color: #f0f0f0; /* Light gray input text color */
+}
+
+.edit-form-buttons {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 20px;
+}
+
+.edit-form-buttons button {
+  cursor: pointer;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 4px;
+  background-color: #007bff; /* Blue button color */
+  color: #fff;
+  margin-left: 10px;
+}
+
+.edit-form-buttons button:hover {
+  background-color: #0056b3;
 }
